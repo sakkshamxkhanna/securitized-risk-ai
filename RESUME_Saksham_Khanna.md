@@ -16,7 +16,7 @@ Theory, Decision Theory (EMV/EOL/EVPI), Quantitative Research, Financial Markets
 
 ## TECHNICAL PROJECTS
 
-**Securitized Products AI Surveillance Pipeline** — `github.com/<user>/securitized-risk-ai` · 2026
+**Securitized Products AI Surveillance Pipeline** — `github.com/sakkshamxkhanna/securitized-risk-ai` · 2026
 
 - Built an end-to-end RMBS surveillance system that generates the monthly desk report from a
   loan-level collateral tape: stratification tapes (FICO/LTV/geography), sequential-pay tranche
