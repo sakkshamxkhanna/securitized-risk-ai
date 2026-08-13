@@ -9,3 +9,5 @@ output/*.xlsx
 output/*.pdf
 output/slide-*.jpg
 tools/node_modules/
+.DS_Store
+RESUME_*.md
