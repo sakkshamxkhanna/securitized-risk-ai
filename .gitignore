@@ -11,3 +11,6 @@ output/slide-*.jpg
 tools/node_modules/
 .DS_Store
 RESUME_*.md
+
+# published site assets (needed by GitHub Pages)
+!docs/assets/**

@@ -1,0 +1,6 @@
+scenario,label,avg_cpr_pct,avg_cdr_pct,cumulative_loss,sub_tranche_writedown
+S1,"Credit stress (rising unemployment, HPI decline)",11.31,2.91,12173172.36,12173172.36
+S2,Rate rally (elevated prepayment incentive),15.75,1.46,5825826.18,5825826.18
+S3,Base-like,8.44,1.42,6250229.23,6250229.23
+S4,Base-like,11.18,1.52,6544150.56,6544150.56
+S5,Rate rally (elevated prepayment incentive),12.32,1.42,5988883.41,5988883.41

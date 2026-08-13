@@ -1,0 +1,4 @@
+tranche,proxy_rating,ead,pd,lgd,expected_loss,risk_weight,rwa
+A (Senior),AAA,228991226.72,0.00215,0.35,172315.9,0.2,45798245.34
+B (Subordinate),BB,32944518.21,0.035839,0.35,413244.51,2.5,82361295.53
+M (Mezz),BBB,68443904.47,0.012902,0.35,309072.14,1.0,68443904.47
