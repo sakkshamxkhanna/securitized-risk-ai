@@ -90,6 +90,21 @@ def test_tranche_balances_never_negative():
     assert (wf.schedule["ending_balance"] >= -1e-6).all()
 
 
+def test_gnn_is_reproducible_on_unchanged_input():
+    """Surveillance output feeds exposure and RWA, so re-running an unchanged
+    tape must reproduce the same risk multipliers. An unseeded weight
+    initialisation previously moved the average cohort multiplier by ~0.03x
+    between runs, changing projected loss, RWA, and which scenario escalated."""
+    from src.models import gnn_risk
+
+    pool = generate_pool(n_loans=300, seed=5)
+    _, first = gnn_risk.train_gnn(pool, epochs=20)
+    _, second = gnn_risk.train_gnn(pool, epochs=20)
+
+    assert first["gnn_risk_multiplier"].tolist() == second["gnn_risk_multiplier"].tolist()
+    assert first["gnn_adjusted_cdr"].tolist() == second["gnn_adjusted_cdr"].tolist()
+
+
 def test_capital_structure_sums_to_pool():
     upb = 5_000_000.0
     assert sum(t.balance for t in waterfall.build_capital_structure(upb)) == pytest.approx(upb, rel=1e-9)

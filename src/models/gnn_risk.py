@@ -76,10 +76,18 @@ class CorrelatedRiskGCN(nn.Module):
         return risk_multiplier
 
 
-def train_gnn(pool: pd.DataFrame, epochs: int = 80):
+def train_gnn(pool: pd.DataFrame, epochs: int = 80, seed: int = 17):
     """Trains against a synthetic 'stress-realized' CDR target that
     injects extra correlated loss on cohorts sharing an originator with
-    a bad-vintage flag, so the GNN has a real correlation signal to learn."""
+    a bad-vintage flag, so the GNN has a real correlation signal to learn.
+
+    The seed is not cosmetic. Surveillance output feeds exposure and RWA,
+    so re-running an unchanged tape must reproduce the same numbers — an
+    unseeded weight initialisation moved the average cohort multiplier by
+    ~0.03x between runs, which propagated into CDR, projected loss, RWA,
+    and which scenario breached the escalation threshold.
+    """
+    torch.manual_seed(seed)
     cohorts, X, A = build_cohort_graph(pool)
 
     rng = np.random.default_rng(3)
