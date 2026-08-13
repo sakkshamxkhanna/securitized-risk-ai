@@ -1,4 +1,5 @@
 {
+  "generated_at": "2026-08-13T10:20:35.193628+00:00",
   "pool_summary": {
     "loan_count": 2000,
     "total_upb": 488885031.95,
@@ -8,50 +9,63 @@
     "wa_dti": 35.9,
     "wa_seasoning_mo": 24.0
   },
-  "avg_cpr": 0.09978178246981567,
-  "avg_cdr": 0.013455036488129195,
-  "gnn_avg_multiplier": 1.3381999731063843,
-  "cumulative_loss_base": 5781378.98,
+  "avg_cpr": 0.09854944505625302,
+  "avg_cdr": 0.014335484128933929,
+  "gnn_avg_multiplier": 1.3714749813079834,
+  "cumulative_loss_base": 6166284.35,
+  "total_rwa": 196603445.34,
+  "total_expected_loss": 894632.55,
+  "forecaster_validation": {
+    "cpr_r2": 0.8642,
+    "cdr_r2": 0.9746,
+    "cpr_mae": 0.00453,
+    "cdr_mae": 0.00037,
+    "cdr_pred_sd": 0.00369,
+    "cdr_true_sd": 0.00374
+  },
   "scenarios": [
     {
       "scenario": "S1",
-      "label": "Base-like",
-      "avg_cpr_pct": 8.91,
-      "avg_cdr_pct": 1.33,
-      "cumulative_loss": 5863846.58,
-      "sub_tranche_writedown": 5863846.58
+      "label": "Credit stress (rising unemployment, HPI decline)",
+      "avg_cpr_pct": 11.31,
+      "avg_cdr_pct": 2.91,
+      "cumulative_loss": 12173172.36,
+      "sub_tranche_writedown": 12173172.36
     },
     {
       "scenario": "S2",
-      "label": "Credit stress (rising unemployment, HPI decline)",
-      "avg_cpr_pct": 16.55,
-      "avg_cdr_pct": 2.39,
-      "cumulative_loss": 9393905.06,
-      "sub_tranche_writedown": 9393905.06
+      "label": "Rate rally (elevated prepayment incentive)",
+      "avg_cpr_pct": 15.75,
+      "avg_cdr_pct": 1.46,
+      "cumulative_loss": 5825826.18,
+      "sub_tranche_writedown": 5825826.18
     },
     {
       "scenario": "S3",
-      "label": "Credit stress (rising unemployment, HPI decline)",
-      "avg_cpr_pct": 9.75,
-      "avg_cdr_pct": 2.83,
-      "cumulative_loss": 12003525.17,
-      "sub_tranche_writedown": 12003525.17
+      "label": "Base-like",
+      "avg_cpr_pct": 8.44,
+      "avg_cdr_pct": 1.42,
+      "cumulative_loss": 6250229.23,
+      "sub_tranche_writedown": 6250229.23
     },
     {
       "scenario": "S4",
       "label": "Base-like",
-      "avg_cpr_pct": 8.46,
-      "avg_cdr_pct": 1.32,
-      "cumulative_loss": 5841214.23,
-      "sub_tranche_writedown": 5841214.23
+      "avg_cpr_pct": 11.18,
+      "avg_cdr_pct": 1.52,
+      "cumulative_loss": 6544150.56,
+      "sub_tranche_writedown": 6544150.56
     },
     {
       "scenario": "S5",
       "label": "Rate rally (elevated prepayment incentive)",
-      "avg_cpr_pct": 14.84,
-      "avg_cdr_pct": 1.31,
-      "cumulative_loss": 5328045.66,
-      "sub_tranche_writedown": 5328045.66
+      "avg_cpr_pct": 12.32,
+      "avg_cdr_pct": 1.42,
+      "cumulative_loss": 5988883.41,
+      "sub_tranche_writedown": 5988883.41
     }
+  ],
+  "escalations": [
+    "ESCALATION: scenario S1 (Credit stress (rising unemployment, HPI decline)) projects cumulative loss of 2.49% of UPB, above the 2.0% desk threshold."
   ]
 }

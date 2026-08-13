@@ -34,14 +34,18 @@ def compute_exposure_table(tranche_summary: pd.DataFrame, pd_estimate: dict[str,
         rating = proxy_rating(r["tranche"])
         rw = RATING_RISK_WEIGHTS[rating]
         ead = r["final_balance"]
-        pd_t = pd_estimate.get(r["tranche"], 0.02)
+        # Round PD before computing EL, not after: the reported EL must
+        # reproduce exactly from the reported EAD x PD x LGD. Computing from
+        # full precision and rounding only for display leaves a table whose
+        # own arithmetic does not tie when a reviewer checks it by hand.
+        pd_t = round(pd_estimate.get(r["tranche"], 0.02), 6)
         el = ead * pd_t * lgd
         rwa = ead * rw
         rows.append({
             "tranche": r["tranche"],
             "proxy_rating": rating,
             "ead": round(ead, 2),
-            "pd": round(pd_t, 4),
+            "pd": pd_t,
             "lgd": lgd,
             "expected_loss": round(el, 2),
             "risk_weight": rw,

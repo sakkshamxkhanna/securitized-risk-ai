@@ -4,3 +4,8 @@ __pycache__/
 output/lora_adapter/
 output/*.csv
 .pytest_cache/
+output/*.pptx
+output/*.xlsx
+output/*.pdf
+output/slide-*.jpg
+tools/node_modules/

@@ -143,6 +143,29 @@ The pipeline writes `run_metrics.json` alongside the report; `/metrics` serves i
 downstream monitoring. Redis caching is visible across runs — the second job logs
 `forecast: cache hit` instead of retraining.
 
+## Distributable pack (Excel + slides)
+
+```bash
+./export_pack.sh
+```
+
+Regenerates both deliverables from the latest run:
+
+**`output/surveillance_pack.xlsx`** — 8 sheets. The stratification and exposure tables are
+**live Excel formulas over the loan tape**, not pasted values: `SUMIFS`/`COUNTIFS` for bucket
+counts and balances, `SUMPRODUCT` for balance-weighted averages, `INDEX`/`MATCH` against the
+risk-weight table, and `EL = EAD × PD × LGD` referencing LGD on the Assumptions sheet. Edit an
+assumption and the workbook reprices. Financial-model colour convention throughout — blue for
+hardcoded inputs, black for formulas, green for cross-sheet links.
+
+**`output/surveillance_deck.pptx`** — 8 slides generated from `run_metrics.json` and the CSVs,
+so the deck never drifts from the run it describes. Native PowerPoint charts, speaker notes on
+every slide, and a closing slide that states the scope limitations plainly.
+
+Both are verified, not just generated: the workbook is recalculated through LibreOffice
+(138 formulas, 0 errors) and every computed cell is asserted equal to the pipeline's own
+figures; the deck is schema-validated and every slide visually inspected.
+
 ## Tests
 
 `tests/test_pipeline.py` asserts the structural invariants the mechanics must satisfy —
