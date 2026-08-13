@@ -9,6 +9,8 @@ Run: python -m src.agents.graph
 """
 from __future__ import annotations
 
+import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated, Any, TypedDict
 
@@ -223,7 +225,24 @@ def report_node(state: SurveillanceState) -> dict:
         "forecaster_validation": getattr(state["forecaster"], "validation", {}),
     }
     path = build_surveillance_report(results, OUTPUT_DIR)
-    return {"log": [f"report: written to {path.name}"]}
+
+    # Machine-readable run summary, consumed by the report server's /metrics
+    # endpoint and by any downstream monitoring.
+    metrics = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "pool_summary": state["summary"],
+        "avg_cpr": state["avg_cpr"],
+        "avg_cdr": state["avg_cdr"],
+        "gnn_avg_multiplier": state["gnn_avg_multiplier"],
+        "cumulative_loss_base": float(state["base_cashflows"]["loss"].sum()),
+        "total_rwa": float(state["exposure"]["rwa"].sum()),
+        "total_expected_loss": float(state["exposure"]["expected_loss"].sum()),
+        "forecaster_validation": getattr(state["forecaster"], "validation", {}),
+        "scenarios": state["stress"].to_dict(orient="records"),
+        "escalations": state.get("escalations", []),
+    }
+    (OUTPUT_DIR / "run_metrics.json").write_text(json.dumps(metrics, indent=2, default=str))
+    return {"log": [f"report: written to {path.name} + run_metrics.json"]}
 
 
 def _route_after_stress(state: SurveillanceState) -> str:

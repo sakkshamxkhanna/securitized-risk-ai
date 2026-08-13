@@ -1,0 +1,55 @@
+# One-shot surveillance run. This is the manually-triggered equivalent of the
+# monthly CronJob in 04-surveillance-cronjob.yaml — used for ad-hoc reruns when
+# a servicer restates a tape, and for demonstrating the pipeline on demand.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: surveillance-run
+  namespace: securitized-risk
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: surveillance
+        role: adhoc-run
+    spec:
+      restartPolicy: Never
+      initContainers:
+        # The pipeline caches model artifacts in Redis; without this the job
+        # races the Redis rollout on a cold cluster and silently falls back
+        # to the in-process cache.
+        - name: wait-for-redis
+          image: redis:7-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until redis-cli -h redis ping 2>/dev/null | grep -q PONG; do
+                echo "waiting for redis..."
+                sleep 2
+              done
+              echo "redis ready"
+      containers:
+        - name: surveillance
+          image: securitized-risk-ai:local
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "src.agents.graph"]
+          envFrom:
+            - configMapRef:
+                name: surveillance-config
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 3Gi
+          volumeMounts:
+            - name: output
+              mountPath: /app/output
+      volumes:
+        - name: output
+          persistentVolumeClaim:
+            claimName: surveillance-output

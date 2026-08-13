@@ -17,6 +17,18 @@ def _fmt_money(x: float) -> str:
     return f"${x:,.0f}"
 
 
+def _display(df, money_cols=("upb", "ead", "expected_loss", "rwa", "cumulative_loss",
+                              "sub_tranche_writedown", "total_principal", "total_interest",
+                              "final_balance")):
+    """Formats currency columns for presentation — pandas renders large floats
+    in scientific notation by default, which is unreadable in a desk report."""
+    out = df.copy()
+    for c in out.columns:
+        if c in money_cols:
+            out[c] = out[c].map(_fmt_money)
+    return out
+
+
 def build_surveillance_report(r: dict, output_dir: Path) -> Path:
     s = r["pool_summary"]
     exp = r["exposure"]
@@ -28,7 +40,7 @@ def build_surveillance_report(r: dict, output_dir: Path) -> Path:
 
     lines = []
     lines.append("# Monthly Surveillance Report — Synthetic RMBS Pool 2026-1")
-    lines.append(f"\n*Generated {date.today().isoformat()} — AI-assisted surveillance pipeline*\n")
+    lines.append(f"\nGenerated {date.today().isoformat()} — AI-assisted surveillance pipeline\n")
     lines.append("---\n")
 
     lines.append("## 1. Pool Summary\n")
@@ -43,11 +55,11 @@ def build_surveillance_report(r: dict, output_dir: Path) -> Path:
 
     lines.append("\n## 2. Collateral Stratification\n")
     lines.append("### FICO distribution\n")
-    lines.append(r["fico_strat"].to_markdown(index=False))
+    lines.append(_display(r["fico_strat"]).to_markdown(index=False))
     lines.append("\n### LTV distribution\n")
-    lines.append(r["ltv_strat"].to_markdown(index=False))
+    lines.append(_display(r["ltv_strat"]).to_markdown(index=False))
     lines.append("\n### Top geographic concentrations\n")
-    lines.append(r["geo_strat"].head(5).to_markdown(index=False))
+    lines.append(_display(r["geo_strat"].head(5)).to_markdown(index=False))
 
     lines.append("\n## 3. Model-Projected Performance (Base Case)\n")
     lines.append(f"The temporal-attention forecaster projects an average **CPR of "
@@ -58,22 +70,22 @@ def build_surveillance_report(r: dict, output_dir: Path) -> Path:
                  f"**{_fmt_money(r['base_cashflows']['loss'].sum())}**.\n")
 
     lines.append("### Highest-risk cohorts (GNN-adjusted)\n")
-    lines.append(top.to_markdown(index=False))
+    lines.append(_display(top).to_markdown(index=False))
     lines.append("\nCohorts are scored on a graph linking originator and state, so a "
                  "deterioration signal on one originator propagates to its other state "
                  "cohorts rather than being treated as an isolated event.\n")
 
     lines.append("\n## 4. Tranche Cashflows & Exposure\n")
-    lines.append(r["waterfall"].tranche_summary.to_markdown(index=False))
+    lines.append(_display(r["waterfall"].tranche_summary).to_markdown(index=False))
     lines.append("\n### Exposure / RWA / expected loss\n")
-    lines.append(exp.to_markdown(index=False))
+    lines.append(_display(exp).to_markdown(index=False))
     lines.append(f"\nTotal RWA: **{_fmt_money(exp['rwa'].sum())}** | "
                  f"Total expected loss: **{_fmt_money(exp['expected_loss'].sum())}**\n")
 
     lines.append("\n## 5. Scenario Stress Testing\n")
     lines.append("Scenarios are sampled from the latent space of a VAE trained on macro "
                  "regime paths — these are generated, not hand-specified.\n")
-    lines.append(stress.to_markdown(index=False))
+    lines.append(_display(stress).to_markdown(index=False))
     lines.append(f"\n**Most adverse scenario:** {worst['scenario']} — *{worst['label']}* — "
                  f"cumulative loss {_fmt_money(worst['cumulative_loss'])}, subordinate "
                  f"write-down {_fmt_money(worst['sub_tranche_writedown'])}.\n")

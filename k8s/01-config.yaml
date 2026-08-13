@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: surveillance-config
+  namespace: securitized-risk
+data:
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  # LoRA narrative pulls GPT-2 weights from the network; disabled by default
+  # so the job is hermetic inside the cluster. Set to "" to enable.
+  SKIP_LORA: "1"
+  PYTHONUNBUFFERED: "1"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: surveillance-output
+  namespace: securitized-risk
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

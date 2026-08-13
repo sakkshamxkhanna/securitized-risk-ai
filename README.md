@@ -97,6 +97,52 @@ docker compose -f docker/docker-compose.yml up --build
 
 Set `SKIP_LORA=1` to skip narrative generation, `DISABLE_REDIS=1` to force the in-memory cache.
 
+## Kubernetes deployment
+
+```bash
+./k8s/deploy.sh
+```
+
+Creates a kind cluster, builds and loads the image, and applies the manifests. Requires
+`colima` (or any Docker runtime), `kind`, and `kubectl` — all free and open-source.
+
+### Workload modelling
+
+Surveillance is a **batch** workload on a monthly remittance cycle, so it is modelled as a
+`CronJob` rather than a long-running Deployment:
+
+| Manifest | Resource | Purpose |
+|---|---|---|
+| `00-namespace.yaml` | Namespace | Isolation |
+| `01-config.yaml` | ConfigMap + PVC | Runtime config; 1Gi volume shared between writer and reader |
+| `02-redis.yaml` | Deployment + Service | Model/artifact cache, with liveness and readiness probes |
+| `03-surveillance-job.yaml` | Job | Ad-hoc rerun (e.g. servicer restates a tape) |
+| `04-surveillance-cronjob.yaml` | CronJob | Monthly cycle, `0 6 26 * *` Europe/London, `concurrencyPolicy: Forbid` |
+| `05-report-server.yaml` | Deployment + NodePort | FastAPI report viewer on the shared PVC |
+
+The schedule follows the 25th-of-month remittance cycle and runs on EMEA hours to match the
+desk. `concurrencyPolicy: Forbid` prevents overlapping surveillance cycles. An init container
+gates each run on Redis readiness — without it the job races the Redis rollout on a cold
+cluster and silently degrades to the in-process cache.
+
+### Operating it
+
+```bash
+# trigger an ad-hoc run
+kubectl -n securitized-risk create job --from=cronjob/monthly-surveillance run-now
+
+# follow it
+kubectl -n securitized-risk logs -f -l app=surveillance --tail=100
+
+# read the report / machine-readable metrics
+open http://localhost:30080
+curl -s http://localhost:30080/metrics | jq
+```
+
+The pipeline writes `run_metrics.json` alongside the report; `/metrics` serves it for
+downstream monitoring. Redis caching is visible across runs — the second job logs
+`forecast: cache hit` instead of retraining.
+
 ## Tests
 
 `tests/test_pipeline.py` asserts the structural invariants the mechanics must satisfy —

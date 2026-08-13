@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report-server
+  namespace: securitized-risk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report-server
+  template:
+    metadata:
+      labels:
+        app: report-server
+    spec:
+      containers:
+        - name: server
+          image: securitized-risk-ai:local
+          imagePullPolicy: IfNotPresent
+          command: ["uvicorn", "src.server:app", "--host", "0.0.0.0", "--port", "8000"]
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: surveillance-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8000
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          volumeMounts:
+            - name: output
+              mountPath: /app/output
+      volumes:
+        - name: output
+          persistentVolumeClaim:
+            claimName: surveillance-output
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-server
+  namespace: securitized-risk
+spec:
+  type: NodePort
+  selector:
+    app: report-server
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30080

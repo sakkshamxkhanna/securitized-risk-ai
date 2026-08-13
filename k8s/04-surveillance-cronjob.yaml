@@ -1,0 +1,58 @@
+# Monthly surveillance cycle. Securitized products remittance reports land on
+# the 25th of each month, so the run is scheduled to follow. This is the
+# primary production workload; the Job in 03 is the ad-hoc equivalent.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: monthly-surveillance
+  namespace: securitized-risk
+spec:
+  schedule: "0 6 26 * *"        # 06:00 on the 26th of each month
+  timeZone: "Europe/London"      # desk runs on EMEA hours
+  concurrencyPolicy: Forbid      # never overlap surveillance cycles
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 3600
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: surveillance
+            role: scheduled-run
+        spec:
+          restartPolicy: Never
+          initContainers:
+            - name: wait-for-redis
+              image: redis:7-alpine
+              command:
+                - sh
+                - -c
+                - |
+                  until redis-cli -h redis ping 2>/dev/null | grep -q PONG; do
+                    echo "waiting for redis..."
+                    sleep 2
+                  done
+          containers:
+            - name: surveillance
+              image: securitized-risk-ai:local
+              imagePullPolicy: IfNotPresent
+              command: ["python", "-m", "src.agents.graph"]
+              envFrom:
+                - configMapRef:
+                    name: surveillance-config
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 1Gi
+                limits:
+                  cpu: "2"
+                  memory: 3Gi
+              volumeMounts:
+                - name: output
+                  mountPath: /app/output
+          volumes:
+            - name: output
+              persistentVolumeClaim:
+                claimName: surveillance-output
