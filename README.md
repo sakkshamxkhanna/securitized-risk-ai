@@ -1,5 +1,9 @@
 # Securitized Products AI Surveillance Pipeline
 
+**▶ Live demo — [sakkshamxkhanna.github.io/securitized-risk-ai](https://sakkshamxkhanna.github.io/securitized-risk-ai/)**
+The generated surveillance report, the slide deck, and downloadable Excel/CSV outputs from a
+real pipeline run. No sign-up, no cold start.
+
 An end-to-end system that produces the monthly surveillance report a securitized-products
 desk analyst would otherwise assemble by hand: loan-level collateral tape → stratification →
 model-projected cashflows → tranche waterfall → exposure/RWA/expected loss → generated
