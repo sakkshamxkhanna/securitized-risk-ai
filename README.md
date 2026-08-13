@@ -170,6 +170,16 @@ Both are verified, not just generated: the workbook is recalculated through Libr
 (138 formulas, 0 errors) and every computed cell is asserted equal to the pipeline's own
 figures; the deck is schema-validated and every slide visually inspected.
 
+## VBA automation
+
+`vba/SurveillanceTools.bas` — four macros over the exported workbook: `BuildStratification`
+(cuts the tape into FICO/LTV bands as live SUMIFS/SUMPRODUCT formulas), `FlagExceptions`
+(marks loans breaching LTV/FICO/DTI thresholds and reports balance at risk), `RefreshAndStamp`
+(full recalc with an audit stamp), and `ExportPackToPDF`.
+
+Import instructions and per-macro notes: [docs/VBA.md](docs/VBA.md). Requires desktop Excel —
+Excel on the web, Google Sheets and LibreOffice cannot run VBA.
+
 ## Tests
 
 `tests/test_pipeline.py` asserts the structural invariants the mechanics must satisfy —
